@@ -1,0 +1,44 @@
+name: Format
+
+on:
+  workflow_call:
+    inputs:
+      command:
+        description: 'The package.json script name which will be called via "pnpm run <command>"'
+        default: "format"
+        required: false
+        type: string
+
+jobs:
+  format:
+    if: github.repository_owner == 'bombshell-dev'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          # Needs access to push to main
+          token: ${{ secrets.BOT_ACCESS_TOKEN }}
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Format code
+        run: pnpm run ${{ inputs.command }}
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "[ci] format"
+          branch: ${{ github.head_ref }}
+          commit_user_name: bombshell-bot
+          commit_author: ${{ github.event.commits[0].author.name }} <${{ github.actor }}@users.noreply.github.com>
