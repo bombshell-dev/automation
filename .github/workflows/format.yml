@@ -8,6 +8,13 @@ on:
         default: "format"
         required: false
         type: string
+    secrets:
+      BOT_APP_ID:
+        description: 'The GitHub App ID for authenticating with the GitHub API'
+        required: true
+      BOT_PRIVATE_KEY:
+        description: 'The GitHub App Private Key for authenticating with the GitHub API'
+        required: true
 
 jobs:
   format:
