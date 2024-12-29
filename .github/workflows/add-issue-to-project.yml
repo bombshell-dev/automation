@@ -61,7 +61,7 @@ jobs:
       - name: Add Issue to project
         env:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
-          ISSUE_ID: ${{ github.event.issues.node_id }}
+          ISSUE_ID: ${{ github.event.issue.node_id }}
         
         run: |
           item_id="$( gh api graphql -f query='
