@@ -1,0 +1,48 @@
+name: preview
+on:
+  workflow_call:
+    inputs:
+      publish:
+        description: 'The directory to publish to pkg.pr.new'
+        default: "./packages/**"
+        required: false
+        type: string
+      template:
+        description: 'The directory of templates to publish to StackBlitz'
+        default: "./examples/**"
+        required: false
+        type: string
+
+jobs:
+  preview:
+    if: github.repository_owner == 'bombshell-dev'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate a token
+        id: bot-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ steps.bot-token.outputs.token }}
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org/
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Format code
+        run: pnpx pkg-pr-new publish '${{inputs.publish}}' --template '${{inputs.template}}'
