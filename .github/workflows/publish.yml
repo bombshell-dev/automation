@@ -1,25 +1,22 @@
-name: build
+name: publish
 
 on:
   workflow_call:
     secrets:
+      NPM_TOKEN:
+        description: 'A token for publishing to the NPM registry'
+        required: true
       BOT_APP_ID:
         description: 'The GitHub App ID for authenticating with the GitHub API'
         required: true
       BOT_PRIVATE_KEY:
         description: 'The GitHub App Private Key for authenticating with the GitHub API'
         required: true
-    outputs:
-      artifact:
-        description: "Artifact URL of the build"
-        value: ${{ jobs.build.outputs.artifact }}
 
 jobs:
-  build:
+  publish:
     if: github.repository_owner == 'bombshell-dev'
     runs-on: ubuntu-latest
-    outputs:
-      artifact: ${{ steps.upload.outputs.artifact-url }}
 
     steps:
       - name: Generate a token
@@ -50,8 +47,11 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - uses: actions/upload-artifact@v4
-        id: upload
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
         with:
-          name: build
-          path: dist
+          publish: pnpm exec changeset publish
+        env:
+          GITHUB_TOKEN: ${{ steps.bot-token.outputs.token }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
