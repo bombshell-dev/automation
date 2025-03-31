@@ -17,6 +17,8 @@ jobs:
   publish:
     if: github.repository_owner == 'bombshell-dev'
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
 
     steps:
       - name: Generate a token
