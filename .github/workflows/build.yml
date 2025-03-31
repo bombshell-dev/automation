@@ -1,17 +1,7 @@
-name: preview
+name: build
+
 on:
   workflow_call:
-    inputs:
-      publish:
-        description: 'The directory to publish to pkg.pr.new'
-        default: "./packages/**"
-        required: false
-        type: string
-      template:
-        description: 'The directory of templates to publish to StackBlitz'
-        default: "./examples/**"
-        required: false
-        type: string
     secrets:
       BOT_APP_ID:
         description: 'The GitHub App ID for authenticating with the GitHub API'
@@ -19,11 +9,17 @@ on:
       BOT_PRIVATE_KEY:
         description: 'The GitHub App Private Key for authenticating with the GitHub API'
         required: true
+    outputs:
+      artifact:
+        description: "Artifact URL of the build"
+        value: ${{ jobs.build.outputs.artifact }}
 
 jobs:
-  preview:
+  build:
     if: github.repository_owner == 'bombshell-dev'
     runs-on: ubuntu-latest
+    outputs:
+      artifact: ${{ steps.upload.outputs.artifact-url }}
 
     steps:
       - name: Generate a token
@@ -51,8 +47,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build packages
+      - name: Build
         run: pnpm run build
 
-      - name: Publish Preview
-        run: pnpx pkg-pr-new publish '${{inputs.publish}}' --template '${{inputs.template}}'
+      - uses: actions/upload-artifact@v4
+        id: upload
+        with:
+          name: build
+          path: dist

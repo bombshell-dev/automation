@@ -1,17 +1,11 @@
-name: preview
+name: build
 on:
   workflow_call:
     inputs:
-      publish:
-        description: 'The directory to publish to pkg.pr.new'
-        default: "./packages/**"
-        required: false
-        type: string
-      template:
-        description: 'The directory of templates to publish to StackBlitz'
-        default: "./examples/**"
-        required: false
-        type: string
+      command:
+        type: 'string'
+        description: 'The name of the package.json script to run'
+        required: true
     secrets:
       BOT_APP_ID:
         description: 'The GitHub App ID for authenticating with the GitHub API'
@@ -21,7 +15,7 @@ on:
         required: true
 
 jobs:
-  preview:
+  build:
     if: github.repository_owner == 'bombshell-dev'
     runs-on: ubuntu-latest
 
@@ -51,8 +45,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build packages
-        run: pnpm run build
-
-      - name: Publish Preview
-        run: pnpx pkg-pr-new publish '${{inputs.publish}}' --template '${{inputs.template}}'
+      - name: Build
+        run: pnpm run "${{env.COMMAND}}"
+        env:
+          COMMAND: ${{ inputs.command }}
