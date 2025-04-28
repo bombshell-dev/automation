@@ -25,21 +25,16 @@ jobs:
       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_MERGEBOT }}
 ```
 
-## tsdown
+## ts down
 
-This workflow provides a standardized build process for TypeScript libraries using tsdown. It includes:
-
-- Automatic building on push and pull requests
-- Node.js setup with caching
-- Automatic tsdown configuration generation
-- Build artifact uploads
+This workflow verifies that your TypeScript project builds successfully. It runs on push and pull requests to ensure your project's build process is working correctly.
 
 ### Usage
 
 Add the following to your repository's workflow:
 
 ```yml
-name: Build
+name: Verify Build
 
 on:
   push:
@@ -48,25 +43,16 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  verify:
     uses: bombshell-dev/automation/.github/workflows/tsdown.yml@main
 ```
 
-The workflow will automatically:
-1. Generate a standard tsdown configuration
-2. Install necessary dependencies (tsdown and @types/node)
-3. Build your TypeScript project
-4. Upload the build artifacts
+The workflow will:
+1. Set up Node.js and pnpm
+2. Install project dependencies
+3. Run the project's build script to verify it builds successfully
 
-The generated configuration includes:
-- ESM output format
-- TypeScript declaration file generation
-- Source maps
-- Minification
-- Node.js platform targeting
-- Tree shaking optimization
-
-If you need to customize the configuration, you can create your own `tsdown.config.ts` file in your project root, and the workflow will use that instead of generating one.
+This ensures your project's build process is working correctly before merging changes.
 
 ## Acknowledgements
 
