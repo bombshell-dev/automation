@@ -1,0 +1,50 @@
+name: tsdown
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Generate tsdown config
+        run: |
+          cat > tsdown.config.ts << 'EOL'
+          import { defineConfig } from 'tsdown'
+          
+          export default defineConfig({
+            entry: ['./src'],
+            format: ['esm'],
+            clean: true,
+            dts: true,
+            minify: true,
+            sourcemap: true,
+            external: [],
+            platform: 'node',
+            treeshake: true
+          })
+          EOL
+          
+      - name: Install tsdown and types
+        run: npm install --save-dev tsdown @types/node
+        
+      - name: Build with tsdown
+        run: npx tsdown build
+        
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 5 
