@@ -2,9 +2,11 @@ name: run
 on:
   workflow_call:
     inputs:
-      command:
+      commands:
         type: 'string'
-        description: 'The name of the package.json script to run'
+        description: |
+          A JSON array of package.json scripts, e.g.
+          '["lint","test","types"]'
         required: true
     secrets:
       BOT_APP_ID:
@@ -15,9 +17,13 @@ on:
         required: true
 
 jobs:
-  build:
+  run:
     if: github.repository_owner == 'bombshell-dev'
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        command: ${{ fromJson(inputs.commands) }}
 
     steps:
       - name: Generate a token
@@ -45,7 +51,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build
+      - name: Run ${{ matrix.command }}
         run: pnpm run "${{env.COMMAND}}"
         env:
-          COMMAND: ${{ inputs.command }}
+          COMMAND: ${{ matrix.command }}
