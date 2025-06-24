@@ -18,7 +18,6 @@ on:
 
 jobs:
   run:
-    if: github.repository_owner == 'bombshell-dev'
     runs-on: ubuntu-latest
 
     strategy:
