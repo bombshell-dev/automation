@@ -8,34 +8,16 @@ on:
           A JSON array of package.json scripts, e.g.
           '["lint","test","types"]'
         required: true
-    secrets:
-      BOT_APP_ID:
-        description: 'The GitHub App ID for authenticating with the GitHub API'
-        required: true
-      BOT_PRIVATE_KEY:
-        description: 'The GitHub App Private Key for authenticating with the GitHub API'
-        required: true
 
 jobs:
   run:
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         command: ${{ fromJson(inputs.commands) }}
 
     steps:
-      - name: Generate a token
-        id: bot-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.BOT_APP_ID }}
-          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
-
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          token: ${{ steps.bot-token.outputs.token }}
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
