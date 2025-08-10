@@ -26,20 +26,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Only generate token if secrets are provided (external calls)
+      # Generate token if secrets are provided
       - name: Generate a token
-        if: secrets.BOT_APP_ID != '' && secrets.BOT_PRIVATE_KEY != ''
         id: bot-token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ secrets.BOT_APP_ID }}
-          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
+          app-id: ${{ secrets.BOT_APP_ID || '' }}
+          private-key: ${{ secrets.BOT_PRIVATE_KEY || '' }}
+        continue-on-error: true
 
-      # Checkout with conditional token usage
+      # Checkout with token if available
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
-          token: ${{ secrets.BOT_APP_ID != '' && secrets.BOT_PRIVATE_KEY != '' && steps.bot-token.outputs.token || '' }}
+          token: ${{ steps.bot-token.outputs.token || '' }}
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
