@@ -26,30 +26,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Check if we have secrets
-      - name: Check secrets availability
-        id: check-secrets
-        run: |
-          if [ -n "${{ secrets.BOT_APP_ID }}" ] && [ -n "${{ secrets.BOT_PRIVATE_KEY }}" ]; then
-            echo "has_secrets=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_secrets=false" >> $GITHUB_OUTPUT
-          fi
-
-      # Generate token only if secrets are available
-      - name: Generate a token
-        if: steps.check-secrets.outputs.has_secrets == 'true'
-        id: bot-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.BOT_APP_ID }}
-          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
-
-      # Checkout with token if available
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          token: ${{ steps.bot-token.outputs.token || '' }}
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
