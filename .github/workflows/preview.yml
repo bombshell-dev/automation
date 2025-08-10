@@ -15,10 +15,10 @@ on:
     secrets:
       BOT_APP_ID:
         description: 'The GitHub App ID for authenticating with the GitHub API'
-        required: true
+        required: false
       BOT_PRIVATE_KEY:
         description: 'The GitHub App Private Key for authenticating with the GitHub API'
-        required: true
+        required: false
 
 jobs:
   preview:
@@ -26,17 +26,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Only generate token if secrets are provided (external calls)
       - name: Generate a token
+        if: secrets.BOT_APP_ID != '' && secrets.BOT_PRIVATE_KEY != ''
         id: bot-token
         uses: actions/create-github-app-token@v1
         with:
           app-id: ${{ secrets.BOT_APP_ID }}
           private-key: ${{ secrets.BOT_PRIVATE_KEY }}
 
+      # Checkout with conditional token usage
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
-          token: ${{ steps.bot-token.outputs.token }}
+          token: ${{ secrets.BOT_APP_ID != '' && secrets.BOT_PRIVATE_KEY != '' && steps.bot-token.outputs.token || '' }}
 
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
