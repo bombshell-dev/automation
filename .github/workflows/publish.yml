@@ -31,6 +31,11 @@ jobs:
           ref: ${{ github.head_ref }}
           token: ${{ steps.bot-token.outputs.token }}
 
+      - name: Setup git user
+        run: |
+          git config --global user.name "bombshell-bot[bot]"
+          git config --global user.email "187071675+bombshell-bot[bot]@users.noreply.github.com"
+
       - name: Setup PNPM
         uses: pnpm/action-setup@v4
 
@@ -58,6 +63,7 @@ jobs:
           publish: pnpm exec changeset publish
           commit: "[ci] release"
           title: "[ci] release"
+          setupGitUser: false
         env:
           GITHUB_TOKEN: ${{ steps.bot-token.outputs.token }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
