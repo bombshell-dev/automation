@@ -3,12 +3,12 @@ on:
   workflow_call:
     inputs:
       publish:
-        description: 'The directory to publish to pkg.pr.new'
+        description: "The directory to publish to pkg.pr.new"
         default: "./packages/**"
         required: false
         type: string
       template:
-        description: 'The directory of templates to publish to StackBlitz'
+        description: "The directory of templates to publish to StackBlitz"
         default: "./examples/**"
         required: false
         type: string
@@ -17,6 +17,10 @@ jobs:
   preview:
     if: github.repository_owner == 'bombshell-dev'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4

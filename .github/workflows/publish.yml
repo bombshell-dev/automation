@@ -4,16 +4,20 @@ on:
   workflow_call:
     secrets:
       BOT_APP_ID:
-        description: 'The GitHub App ID for authenticating with the GitHub API'
+        description: "The GitHub App ID for authenticating with the GitHub API"
         required: true
       BOT_PRIVATE_KEY:
-        description: 'The GitHub App Private Key for authenticating with the GitHub API'
+        description: "The GitHub App Private Key for authenticating with the GitHub API"
         required: true
 
 jobs:
   publish:
     if: github.repository_owner == 'bombshell-dev'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
 
     steps:
       - name: Generate a token
