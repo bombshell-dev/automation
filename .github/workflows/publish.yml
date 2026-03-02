@@ -3,9 +3,6 @@ name: publish
 on:
   workflow_call:
     secrets:
-      NPM_TOKEN:
-        description: 'A token for publishing to the NPM registry'
-        required: true
       BOT_APP_ID:
         description: 'The GitHub App ID for authenticating with the GitHub API'
         required: true
@@ -66,4 +63,3 @@ jobs:
           setupGitUser: false
         env:
           GITHUB_TOKEN: ${{ steps.bot-token.outputs.token }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
