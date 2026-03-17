@@ -55,8 +55,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: https://registry.npmjs.org/
-          cache: "pnpm"
 
       - id: message
         name: Format Discord message
@@ -67,10 +65,10 @@ jobs:
           COMMIT_ID: ${{ github.event.commits[0].id }}
           EMOJIS: ${{ inputs.EMOJIS }}
           COAUTHOR_TEMPLATES: ${{ inputs.COAUTHOR_TEMPLATES }}
-        run: node automation/scripts/mergebot.js
+        run: node automation/dist/mergebot.mjs
 
       - name: Send message on Discord
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           DISCORD_MESSAGE: "${{ steps.message.outputs.DISCORD_MESSAGE }}"
-        run: node automation/scripts/discord.js
+        run: node automation/dist/discord.mjs

@@ -1,3 +1,4 @@
+import process from 'node:process';
 const {
 	GITHUB_ACTION,
 	GITHUB_EVENT_NAME,
@@ -16,17 +17,13 @@ if (!GITHUB_ACTION || !DISCORD_WEBHOOK) {
 }
 
 const body = {
-	content: DISCORD_MESSAGE,
+	content: DISCORD_MESSAGE!,
+	username: DISCORD_USERNAME,
+	avatar_url: DISCORD_AVATAR,
 };
-if (DISCORD_USERNAME) {
-	body.username = DISCORD_USERNAME;
-}
-if (DISCORD_AVATAR) {
-	body.avatar_url = DISCORD_AVATAR;
-}
-const headers = {
+const headers: Record<string, string> = {
 	"Content-Type": "application/json",
-	"X-GitHub-Event": GITHUB_EVENT_NAME,
+	"X-GitHub-Event": GITHUB_EVENT_NAME!,
 };
 
 await fetch(`${DISCORD_WEBHOOK}?wait=true`, {

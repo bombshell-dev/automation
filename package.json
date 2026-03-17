@@ -1,3 +1,15 @@
 {
-    "type": "module"
+    "name": "@bomb.sh/automation",
+    "private": true,
+    "type": "module",
+    "exports": {
+        "./*": "./dist/*.mjs"
+    },
+    "scripts": {
+        "build": "bsh build --bundle"
+    },
+    "devDependencies": {
+        "@bomb.sh/tools": "^0.2.1",
+        "@types/node": "^22.19.15"
+    }
 }
