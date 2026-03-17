@@ -64,4 +64,4 @@ setOutput("COMMENT", `### 🤖 Automated account detected
 |--------|--------|--------|
 ${flagsTable}
 
-<sub>Analyzed ${events.length} public events via <a href="https://www.npmjs.com/package/voight-kampff-test">voight-kampff-test</a></sub>`);
+<sub>Analyzed ${events.length} public events via <a href="https://www.npmx.dev/package/voight-kampff-test">voight-kampff-test</a></sub>`);
