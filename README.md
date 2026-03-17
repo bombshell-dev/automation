@@ -2,28 +2,19 @@
 
 Shared GitHub Actions for the `bombshell-dev` organization.
 
-## mergebot
+## Workflows
 
-This workflow posts a celebratory message in a Discord channel of your choice for each commit. For example:
+All workflows are [reusable](https://docs.github.com/en/actions/sharing-automations/reusing-workflows) and called via `workflow_call`.
 
-> 🥳 Merged! user-a: commit (#001)
-> With essential contributions from user-b and user-c! 💣
-
-### Usage
-```yml
-name: mergebot
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  mergebot:
-    if: ${{ github.repository_owner == 'bombshell-dev' }}
-    uses: bombshell-dev/automation/mergebot.yml@main
-    secrets:
-      DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_MERGEBOT }}
-```
+| Workflow | Description |
+| --- | --- |
+| [mergebot](docs/mergebot.md) | Post celebratory Discord messages on merge, with co-author recognition |
+| [run](docs/run.md) | Run package.json scripts in parallel via matrix |
+| [format](docs/format.md) | Auto-format code on PRs and commit the result |
+| [preview](docs/preview.md) | Publish preview packages to pkg.pr.new |
+| [publish](docs/publish.md) | Create release PRs or publish to npm via changesets |
+| [add-issue-to-project](docs/add-issue-to-project.md) | Add new issues to the GitHub Project with "Needs triage" status |
+| [move-issue-to-backlog](docs/move-issue-to-backlog.md) | Move closed issues to "Backlog" in the GitHub Project |
 
 ## Acknowledgements
 
