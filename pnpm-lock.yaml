@@ -14,6 +14,9 @@ importers:
       '@types/node':
         specifier: ^22.19.15
         version: 22.19.15
+      voight-kampff-test:
+        specifier: ^2.2.0
+        version: 2.2.0
 
 packages:
 
@@ -1112,6 +1115,9 @@ packages:
       jsdom:
         optional: true
 
+  voight-kampff-test@2.2.0:
+    resolution: {integrity: sha512-ri+tLpJvpNccHc6IWJHdF6wEKdXpE5xZH3Wc8WAGDiEi0zjJgjEWSA78czapPxiudUDLlv/nOqG8DeLUJK29gQ==}
+
   walk-up-path@4.0.0:
     resolution: {integrity: sha512-3hu+tD8YzSLGuFYtPRb48vdhKMi0KQV5sn+uWr8+7dMEq/2G/dtLrdDinkLjqq5TIbIBjYJ4Ax/n3YiaW7QM8A==}
     engines: {node: 20 || >=22}
@@ -2015,6 +2021,8 @@ snapshots:
       '@types/node': 22.19.15
     transitivePeerDependencies:
       - msw
+
+  voight-kampff-test@2.2.0: {}
 
   walk-up-path@4.0.0: {}
 

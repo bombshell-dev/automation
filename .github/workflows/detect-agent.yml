@@ -1,0 +1,127 @@
+name: detect-agent
+
+on:
+  workflow_call:
+    inputs:
+      LABEL:
+        description: >
+          Label to apply when the PR author is classified as automated.
+        default: "automated"
+        type: string
+        required: false
+      BYPASS_MEMBERS:
+        description: >
+          Skip scanning for org members and collaborators.
+        default: true
+        type: boolean
+        required: false
+    outputs:
+      classification:
+        description: "The classification result: organic, mixed, or automation"
+        value: ${{ jobs.detect.outputs.classification }}
+      score:
+        description: "The raw score from voight-kampff-test"
+        value: ${{ jobs.detect.outputs.score }}
+      is_agent:
+        description: "Whether the PR author is classified as automated (true/false)"
+        value: ${{ jobs.detect.outputs.is_agent }}
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      classification: ${{ steps.analyze.outputs.CLASSIFICATION }}
+      score: ${{ steps.analyze.outputs.SCORE }}
+      is_agent: ${{ steps.analyze.outputs.IS_AGENT }}
+    steps:
+      - name: Check scan cache
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .scan-marker
+          key: detect-agent-pr-${{ github.event.pull_request.number }}
+
+      - name: Check for bypass
+        if: steps.cache.outputs.cache-hit != 'true'
+        id: bypass
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          BYPASS_MEMBERS: ${{ inputs.BYPASS_MEMBERS }}
+        run: |
+          # Fast-path: [bot] suffix means GitHub App bot account
+          if [[ "$PR_AUTHOR" == *"[bot]" ]]; then
+            echo "is_bot=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Check org membership
+          if [[ "$BYPASS_MEMBERS" == "true" ]]; then
+            STATUS=$(gh api repos/${{ github.repository }}/collaborators/$PR_AUTHOR --silent -i 2>&1 | head -1 | awk '{print $2}')
+            if [[ "$STATUS" == "204" ]]; then
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Label bot account
+        if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create "${{ inputs.LABEL }}" --repo ${{ github.repository }} --color "D93F0B" --description "PR author detected as automated" --force
+          gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --add-label "${{ inputs.LABEL }}"
+
+      - name: Checkout
+        if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: "bombshell-dev/automation"
+          ref: "main"
+          path: "automation"
+
+      - name: Setup Node
+        if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true'
+        run: npm install --prefix automation
+
+      - id: analyze
+        name: Analyze PR author
+        if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: node automation/dist/detect-agent.mjs
+
+      - name: Ensure label exists
+        if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true' && steps.analyze.outputs.IS_AGENT == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh label create "${{ inputs.LABEL }}" --repo ${{ github.repository }} --color "D93F0B" --description "PR author detected as automated" --force
+
+      - name: Add label
+        if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true' && steps.analyze.outputs.IS_AGENT == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --add-label "${{ inputs.LABEL }}"
+
+      - name: Comment on PR
+        if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true' && steps.analyze.outputs.IS_AGENT == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMENT_BODY: ${{ steps.analyze.outputs.COMMENT }}
+        run: gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$COMMENT_BODY"
+
+      - name: Create scan marker
+        if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true'
+        run: echo "scanned" > .scan-marker
+
+      - name: Save scan cache
+        if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .scan-marker
+          key: detect-agent-pr-${{ github.event.pull_request.number }}
