@@ -15,6 +15,7 @@ All workflows are [reusable](https://docs.github.com/en/actions/sharing-automati
 | [publish](docs/publish.md) | Create release PRs or publish to npm via changesets |
 | [add-issue-to-project](docs/add-issue-to-project.md) | Add new issues to the GitHub Project with "Needs triage" status |
 | [move-issue-to-backlog](docs/move-issue-to-backlog.md) | Move closed issues to "Backlog" in the GitHub Project |
+| [detect-agent](docs/detect-agent.md) | Detect automated PR authors and label them |
 
 ## Acknowledgements
 

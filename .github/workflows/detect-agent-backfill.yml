@@ -1,0 +1,111 @@
+name: detect-agent-backfill
+
+on:
+  workflow_call:
+    inputs:
+      LABEL:
+        description: >
+          Label to apply when the PR author is classified as automated.
+        default: "automated"
+        type: string
+        required: false
+      BYPASS_MEMBERS:
+        description: >
+          Skip scanning for org members and collaborators.
+        default: true
+        type: boolean
+        required: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          repository: "bombshell-dev/automation"
+          ref: "main"
+          path: "automation"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Ensure label exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh label create "${{ inputs.LABEL }}" --repo ${{ github.repository }} --color "D93F0B" --description "PR author detected as automated" --force
+
+      - name: Scan open PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+          LABEL: ${{ inputs.LABEL }}
+          BYPASS_MEMBERS: ${{ inputs.BYPASS_MEMBERS }}
+        run: |
+          set -euo pipefail
+
+          # Get all open PRs with author info
+          PRS=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --json number,author --limit 999)
+          if [ "$(echo "$PRS" | jq 'length')" -eq 0 ]; then
+            echo "No open PRs found"
+            exit 0
+          fi
+
+          # Build unique authors map: { "author": [pr_numbers] }
+          AUTHORS=$(echo "$PRS" | jq -r '
+            group_by(.author.login)
+            | map({ key: .[0].author.login, value: [.[].number] })
+            | from_entries
+          ')
+
+          for AUTHOR in $(echo "$AUTHORS" | jq -r 'keys[]'); do
+            PR_NUMS=$(echo "$AUTHORS" | jq -r --arg a "$AUTHOR" '.[$a] | map(tostring) | join(",")')
+            echo "::group::$AUTHOR (PRs: $PR_NUMS)"
+
+            # Bot check: [bot] suffix means GitHub App bot account
+            if [[ "$AUTHOR" == *"[bot]" ]]; then
+              echo "Bot account detected, labeling PRs"
+              for PR in $(echo "$AUTHORS" | jq -r --arg a "$AUTHOR" '.[$a][]'); do
+                gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --add-label "$LABEL" || true
+              done
+              echo "::endgroup::"
+              continue
+            fi
+
+            # Collaborator check
+            if [[ "$BYPASS_MEMBERS" == "true" ]]; then
+              STATUS=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$AUTHOR" --silent -i 2>&1 | head -1 | awk '{print $2}')
+              if [[ "$STATUS" == "204" ]]; then
+                echo "Skipping collaborator"
+                echo "::endgroup::"
+                continue
+              fi
+            fi
+
+            # Run detect-agent with --json for structured output
+            export PR_AUTHOR="$AUTHOR"
+            RESULT=$(node automation/dist/detect-agent.mjs --json) || {
+              echo "::warning::Failed to analyze $AUTHOR"
+              echo "::endgroup::"
+              continue
+            }
+
+            IS_AGENT=$(echo "$RESULT" | jq -r '.isAgent')
+            COMMENT=$(echo "$RESULT" | jq -r '.comment')
+
+            if [[ "$IS_AGENT" == "true" ]]; then
+              echo "Flagged as automated, labeling + commenting"
+              for PR in $(echo "$AUTHORS" | jq -r --arg a "$AUTHOR" '.[$a][]'); do
+                gh pr edit "$PR" --repo "$GITHUB_REPOSITORY" --add-label "$LABEL" || true
+                if [ -n "$COMMENT" ]; then
+                  gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body "$COMMENT" || true
+                fi
+              done
+            else
+              echo "Not flagged"
+            fi
+
+            echo "::endgroup::"
+          done
