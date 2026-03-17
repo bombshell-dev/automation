@@ -1,4 +1,4 @@
-import { setOutput } from "./utils.js";
+import { setOutput } from "./utils";
 
 const { COMMIT_AUTHOR, COMMIT_ID, COMMIT_MESSAGE, GITHUB_REPO } = process.env;
 if (!COMMIT_AUTHOR || !COMMIT_ID || !COMMIT_MESSAGE || !GITHUB_REPO) {
@@ -8,13 +8,7 @@ if (!COMMIT_AUTHOR || !COMMIT_ID || !COMMIT_MESSAGE || !GITHUB_REPO) {
 }
 setDiscordMessage(COMMIT_AUTHOR, COMMIT_ID, COMMIT_MESSAGE, GITHUB_REPO);
 
-/**
- * @param {string} author The name of the commit author
- * @param {string} id The commit ID
- * @param {string} commitMsg A full commit message
- * @param {string} repo The full GitHub repo name to link to, e.g. `'withastro/starlight'`
- */
-function setDiscordMessage(author, id, commitMsg, repo) {
+function setDiscordMessage(author: string, id: string, commitMsg: string, repo: string) {
 	const commitMessage = commitMsg
 		.split("\n")[0]
 		.replaceAll("`", "")
@@ -24,7 +18,7 @@ function setDiscordMessage(author, id, commitMsg, repo) {
 		.split("\n")
 		.slice(2)
 		.filter((line) => line.match(/Co-authored-by: (.+) <.+>/i))
-		.map((line) => line.match(/Co-authored-by: (.+) <.+>/i)[1])
+		.map((line) => line.match(/Co-authored-by: (.+) <.+>/i)![1])
 		.filter((name) => name !== "github-actions[bot]");
 
 	let coAuthorThanks = "";
@@ -46,31 +40,17 @@ function setDiscordMessage(author, id, commitMsg, repo) {
 	);
 }
 
-/**
- * Generate a list like `'foo, bar and baz'` from an array
- * like `['foo', 'bar', 'baz']`.
- * @param {string[]} list List of words to format
- */
-function formatAsCommaSeparatedList(list) {
+function formatAsCommaSeparatedList(list: string[]) {
 	if (list.length === 1) return list[0];
 	return `${list.slice(0, -1).join(", ")} & ${list.at(-1)}`;
 }
 
-/**
- * Pick a random item from an array of items.
- * @param {string[]} items Items to pick from
- */
-function pick(items) {
+function pick(items: string[]) {
 	return items[Math.floor(Math.random() * items.length)];
 }
 
-/**
- * Get a randomised fun thank you message for co-authors.
- * @param {string} names Names of co-authors to be thanked
- */
-function getCoAuthorsMessage(names) {
-	/** @type {string[]} */
-	let messages = [];
+function getCoAuthorsMessage(names: string) {
+	let messages: string[] = [];
 	try {
 		messages = JSON.parse(process.env.COAUTHOR_TEMPLATES || "[]");
 	} catch (err) {
@@ -84,7 +64,7 @@ function getCoAuthorsMessage(names) {
 			"Thanks <names> for helping! ✨",
 			"<names> stepped up to lend a hand — thank you! 🙌",
 			"<names> with the assist! 💪",
-			"Couldn’t have done this without <names>! 💜",
+			"Couldn't have done this without <names>! 💜",
 			"Made even better by <names>! 🚀",
 			"And the team effort award goes to… <names>! 🏆",
 			"Featuring contributions by <names>! 🌟",

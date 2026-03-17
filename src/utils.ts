@@ -3,7 +3,7 @@ import * as fs from 'node:fs'
 import * as os from 'node:os'
 
 /** Based on https://github.com/actions/toolkit/blob/4e3b068ce116d28cb840033c02f912100b4592b0/packages/core/src/file-command.ts */
-export function setOutput(key, value) {
+export function setOutput(key: string, value: string) {
   const filePath = process.env.GITHUB_OUTPUT || ''
   if (filePath) {
     return issueFileCommand('OUTPUT', prepareKeyValueMessage(key, value))
@@ -11,7 +11,7 @@ export function setOutput(key, value) {
   process.stdout.write(os.EOL)
 }
 
-function issueFileCommand(command, message) {
+function issueFileCommand(command: string, message: string) {
   const filePath = process.env[`GITHUB_${command}`]
   if (!filePath) {
     throw new Error(
@@ -27,7 +27,7 @@ function issueFileCommand(command, message) {
   })
 }
 
-function prepareKeyValueMessage(key, value) {
+function prepareKeyValueMessage(key: string, value: string) {
   const delimiter = `gh-delimiter-${crypto.randomUUID()}`
   const convertedValue = toCommandValue(value)
 
@@ -49,12 +49,12 @@ function prepareKeyValueMessage(key, value) {
   return `${key}<<${delimiter}${os.EOL}${convertedValue}${os.EOL}${delimiter}`
 }
 
-function toCommandValue(input) {
+function toCommandValue(input: unknown): string {
   if (input === null || input === undefined) {
     return ''
   }
   if (typeof input === 'string' || input instanceof String) {
-    return input
+    return input as string
   }
   return JSON.stringify(input)
 }
