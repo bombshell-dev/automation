@@ -40,6 +40,28 @@ jobs:
     uses: bombshell-dev/automation/.github/workflows/detect-agent.yml@main
 ```
 
+### With backfill support
+
+Scan new PRs automatically and backfill all open PRs on demand via `workflow_dispatch`.
+
+```yaml
+name: Detect agent
+
+on:
+  pull_request_target:
+    types: [opened]
+  workflow_dispatch: {}
+
+jobs:
+  detect:
+    if: github.event_name != 'workflow_dispatch'
+    uses: bombshell-dev/automation/.github/workflows/detect-agent.yml@main
+
+  backfill:
+    if: github.event_name == 'workflow_dispatch'
+    uses: bombshell-dev/automation/.github/workflows/detect-agent-backfill.yml@main
+```
+
 ### Custom label
 
 ```yaml

@@ -1,6 +1,8 @@
 import { identifyReplicant } from "voight-kampff-test";
 import { setOutput } from "./utils";
 
+const jsonMode = process.argv.includes("--json");
+
 const { GITHUB_TOKEN, PR_AUTHOR } = process.env;
 if (!GITHUB_TOKEN || !PR_AUTHOR) {
 	throw new Error(
@@ -42,19 +44,11 @@ const { classification, score, flags } = identifyReplicant({
 	events,
 });
 
-console.log(`Classification: ${classification} (score: ${score})`);
-for (const flag of flags) {
-	console.log(`  [${flag.points > 0 ? "+" : ""}${flag.points}] ${flag.label}: ${flag.detail}`);
-}
-
-setOutput("CLASSIFICATION", classification);
-setOutput("SCORE", String(score));
-setOutput("IS_AGENT", classification === "automation" ? "true" : "false");
-
+const isAgent = classification === "automation";
 const flagsTable = flags
 	.map((f) => `| ${f.label} | ${f.points > 0 ? "+" : ""}${f.points} | ${f.detail} |`)
 	.join("\n");
-setOutput("COMMENT", `### 🤖 Automated account detected
+const comment = `### 🤖 Automated account detected
 
 [@${PR_AUTHOR}](https://github.com/${PR_AUTHOR}) has been flagged as a likely automated account.
 
@@ -64,4 +58,19 @@ setOutput("COMMENT", `### 🤖 Automated account detected
 |--------|--------|--------|
 ${flagsTable}
 
-<sub>Analyzed ${events.length} public events via <a href="https://www.npmx.dev/package/voight-kampff-test">voight-kampff-test</a></sub>`);
+<sub>Analyzed ${events.length} public events via <a href="https://www.npmx.dev/package/voight-kampff-test">voight-kampff-test</a></sub>`;
+
+const log = jsonMode ? console.error : console.log;
+log(`Classification: ${classification} (score: ${score})`);
+for (const flag of flags) {
+	log(`  [${flag.points > 0 ? "+" : ""}${flag.points}] ${flag.label}: ${flag.detail}`);
+}
+
+if (jsonMode) {
+	console.log(JSON.stringify({ classification, score, isAgent, comment }));
+} else {
+	setOutput("CLASSIFICATION", classification);
+	setOutput("SCORE", String(score));
+	setOutput("IS_AGENT", isAgent ? "true" : "false");
+	setOutput("COMMENT", comment);
+}
