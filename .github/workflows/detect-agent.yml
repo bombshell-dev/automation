@@ -59,8 +59,7 @@ jobs:
           fi
           # Check org membership
           if [[ "$BYPASS_MEMBERS" == "true" ]]; then
-            STATUS=$(gh api repos/${{ github.repository }}/collaborators/$PR_AUTHOR --silent -i 2>&1 | head -1 | awk '{print $2}')
-            if [[ "$STATUS" == "204" ]]; then
+            if gh api repos/${{ github.repository }}/collaborators/$PR_AUTHOR --silent 2>/dev/null; then
               echo "skip=true" >> "$GITHUB_OUTPUT"
             fi
           fi

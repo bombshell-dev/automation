@@ -79,8 +79,7 @@ jobs:
 
             # Collaborator check
             if [[ "$BYPASS_MEMBERS" == "true" ]]; then
-              STATUS=$(gh api "repos/$GITHUB_REPOSITORY/collaborators/$AUTHOR" --silent -i 2>&1 | head -1 | awk '{print $2}')
-              if [[ "$STATUS" == "204" ]]; then
+              if gh api "repos/$GITHUB_REPOSITORY/collaborators/$AUTHOR" --silent 2>/dev/null; then
                 echo "Skipping collaborator"
                 echo "::endgroup::"
                 continue
