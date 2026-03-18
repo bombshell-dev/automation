@@ -33,6 +33,9 @@ jobs:
       classification: ${{ steps.analyze.outputs.CLASSIFICATION }}
       score: ${{ steps.analyze.outputs.SCORE }}
       is_agent: ${{ steps.analyze.outputs.IS_AGENT }}
+    permissions:
+      issues: write
+      pull-requests: write
     steps:
       - name: Check scan cache
         id: cache
