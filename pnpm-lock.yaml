@@ -15,8 +15,8 @@ importers:
         specifier: ^22.19.15
         version: 22.19.15
       voight-kampff-test:
-        specifier: ^2.2.0
-        version: 2.2.0
+        specifier: ^2.2.1
+        version: 2.2.1
 
 packages:
 
@@ -1115,8 +1115,8 @@ packages:
       jsdom:
         optional: true
 
-  voight-kampff-test@2.2.0:
-    resolution: {integrity: sha512-ri+tLpJvpNccHc6IWJHdF6wEKdXpE5xZH3Wc8WAGDiEi0zjJgjEWSA78czapPxiudUDLlv/nOqG8DeLUJK29gQ==}
+  voight-kampff-test@2.2.1:
+    resolution: {integrity: sha512-3UZeXWdurDttmk31fR+W+w292z0H3qbwCz1ZQSxNIfaDzyNfFjt8jAhzIOF7WsVG86PJMcsujVJutacewguqzw==}
 
   walk-up-path@4.0.0:
     resolution: {integrity: sha512-3hu+tD8YzSLGuFYtPRb48vdhKMi0KQV5sn+uWr8+7dMEq/2G/dtLrdDinkLjqq5TIbIBjYJ4Ax/n3YiaW7QM8A==}
@@ -2022,7 +2022,7 @@ snapshots:
     transitivePeerDependencies:
       - msw
 
-  voight-kampff-test@2.2.0: {}
+  voight-kampff-test@2.2.1: {}
 
   walk-up-path@4.0.0: {}
 

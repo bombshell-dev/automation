@@ -12,6 +12,6 @@
     "devDependencies": {
         "@bomb.sh/tools": "^0.2.1",
         "@types/node": "^22.19.15",
-        "voight-kampff-test": "^2.2.0"
+        "voight-kampff-test": "^2.2.1"
     }
 }
