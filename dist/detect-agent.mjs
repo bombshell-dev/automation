@@ -1,5 +1,5 @@
 import { t as setOutput } from "./utils-DQae65qb.mjs";
-//#region node_modules/.pnpm/voight-kampff-test@2.2.0/node_modules/voight-kampff-test/dist/index.mjs
+//#region node_modules/.pnpm/voight-kampff-test@2.2.1/node_modules/voight-kampff-test/dist/index.mjs
 var e = Object.create, t = Object.defineProperty, n = Object.getOwnPropertyDescriptor, r = Object.getOwnPropertyNames, i = Object.getPrototypeOf, a = Object.prototype.hasOwnProperty, o = (e, t) => () => (t || e((t = { exports: {} }).exports, t), t.exports), s = (e, i, o, s) => {
 	if (i && typeof i == `object` || typeof i == `function`) for (var c = r(i), l = 0, u = c.length, d; l < u; l++) d = c[l], !a.call(e, d) && d !== o && t(e, d, {
 		get: ((e) => i[e]).bind(null, d),
@@ -66,9 +66,9 @@ const l = {
 	CREATE_BURST_HIGH: 8,
 	POINTS_CREATE_BURST_EXTREME: 35,
 	POINTS_CREATE_BURST_HIGH: 25,
-	HOURS_ACTIVE_EXTREME: 18,
-	EVENTS_PER_HOUR_MIN: 1.5,
-	POINTS_24_7_ACTIVITY: 30,
+	HOURS_ACTIVE_EXTREME: 21,
+	EVENTS_PER_HOUR_MIN: 2,
+	POINTS_24_7_ACTIVITY: 25,
 	EVENT_TYPE_DIVERSITY_MIN: 2,
 	POINTS_LOW_DIVERSITY: 20,
 	ISSUE_COMMENT_SPAM_WINDOW_MINUTES: 2,
@@ -417,7 +417,7 @@ function m({ createdAt: e, reposCount: t, accountName: n, events: r }) {
 	});
 	let c = a < l.AGE_YOUNG_ACCOUNT;
 	if (r.length >= l.MIN_EVENTS_FOR_ANALYSIS) {
-		let e = r.filter((e) => e.type === `CreateEvent`);
+		let e = r.filter((e) => e.type === `CreateEvent` && e.payload?.ref_type === `repository`);
 		if (e.length >= l.CREATE_EVENTS_MIN) {
 			let t = e.map((e) => (0, f.default)(e.created_at)).sort((e, t) => e.valueOf() - t.valueOf()), n = 0, r = 0;
 			for (let e = 0; e < t.length; e++) {
