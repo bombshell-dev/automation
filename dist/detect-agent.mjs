@@ -633,9 +633,25 @@ function m({ createdAt: e, reposCount: t, accountName: n, events: r }) {
 		}
 	};
 }
+function h(e) {
+	return e ? e === `organic` ? {
+		label: `Organic activity`,
+		description: `No automation signals detected in the analyzed events.`
+	} : e === `mixed` ? {
+		label: `Mixed activity`,
+		description: `Activity patterns show a mix of organic and automated signals.`
+	} : {
+		label: `Automation signals`,
+		description: `Activity patterns show signs of automation.`
+	} : {
+		label: `Analysis unavailable`,
+		description: `Classification is not available for this account.`
+	};
+}
 //#endregion
 //#region src/detect-agent.ts
 const jsonMode = process.argv.includes("--json");
+const log = jsonMode ? console.error : console.log;
 const { GITHUB_TOKEN, PR_AUTHOR } = process.env;
 if (!GITHUB_TOKEN || !PR_AUTHOR) throw new Error(`Missing input.\nRequired environment variables: GITHUB_TOKEN, PR_AUTHOR\n`);
 const headers = {
@@ -660,21 +676,37 @@ const { classification, score, flags } = m({
 	createdAt: user.created_at,
 	events
 });
-const isAgent = classification === "automation";
-const comment = `### 🤖 Automated account detected
+let verifiedAutomationList = [];
+try {
+	const response = await fetch(`https://api.github.com/repos/matteogabriele/agentscan/contents/data/verified-automations-list.json`, { headers });
+	if (!response.ok) throw new Error(`Failed to fetch verified automations list: ${response.status}`);
+	const data = await response.json();
+	if ("content" in data) {
+		const content = Buffer.from(data.content, "base64").toString("utf-8");
+		verifiedAutomationList = JSON.parse(content);
+	}
+} catch (error) {
+	log("Could not fetch verified automations list");
+}
+const details = !!verifiedAutomationList.find((account) => account.username === PR_AUTHOR) ? {
+	label: "Flagged by community",
+	description: "This account has been flagged as potentially automated by the community."
+} : h(classification);
+const flagsTable = flags.map((f) => `| ${f.label} | ${f.points > 0 ? "+" : ""}${f.points} | ${f.detail} |`).join("\n");
+const comment = `### ${details.label}
 
-[@${PR_AUTHOR}](https://github.com/${PR_AUTHOR}) has been flagged as a likely automated account.
+[@${PR_AUTHOR}](https://github.com/${PR_AUTHOR}) ${details.description}
 
 **Classification:** \`${classification}\` (score: ${score})
 
 | Signal | Points | Detail |
 |--------|--------|--------|
-${flags.map((f) => `| ${f.label} | ${f.points > 0 ? "+" : ""}${f.points} | ${f.detail} |`).join("\n")}
+${flagsTable}
 
 <sub>Analyzed ${events.length} public events via <a href="https://www.npmx.dev/package/voight-kampff-test">voight-kampff-test</a></sub>`;
-const log = jsonMode ? console.error : console.log;
 log(`Classification: ${classification} (score: ${score})`);
 for (const flag of flags) log(`  [${flag.points > 0 ? "+" : ""}${flag.points}] ${flag.label}: ${flag.detail}`);
+const isAgent = classification === "automation";
 if (jsonMode) console.log(JSON.stringify({
 	classification,
 	score,
