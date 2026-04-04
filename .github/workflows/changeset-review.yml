@@ -1,0 +1,101 @@
+name: changeset-review
+
+on:
+  workflow_call:
+    inputs:
+      MODEL:
+        description: >
+          GitHub Models model ID to use for analysis.
+        default: "openai/gpt-4.1-mini"
+        type: string
+        required: false
+    secrets:
+      BOT_APP_ID:
+        description: "The GitHub App ID for authenticating as bombshell-bot"
+        required: true
+      BOT_PRIVATE_KEY:
+        description: "The GitHub App Private Key for authenticating as bombshell-bot"
+        required: true
+    outputs:
+      review_event:
+        description: "The review event type: COMMENT or none"
+        value: ${{ jobs.review.outputs.review_event }}
+      semver_impact:
+        description: "The detected semver impact: none, patch, minor, or major"
+        value: ${{ jobs.review.outputs.semver_impact }}
+      needs_changeset:
+        description: "Whether the PR needs a changeset (true/false)"
+        value: ${{ jobs.review.outputs.needs_changeset }}
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    outputs:
+      review_event: ${{ steps.analyze.outputs.REVIEW_EVENT }}
+      semver_impact: ${{ steps.analyze.outputs.SEMVER_IMPACT }}
+      needs_changeset: ${{ steps.analyze.outputs.NEEDS_CHANGESET }}
+    permissions:
+      contents: read
+      pull-requests: write
+      models: read
+    steps:
+      - name: Generate bot token
+        id: bot-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
+
+      - name: Check review cache
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .review-marker
+          key: changeset-review-pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}
+
+      - name: Checkout automation
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: "bombshell-dev/automation"
+          ref: "main"
+          path: "automation"
+
+      - name: Setup PNPM
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: pnpm install --prefix automation
+
+      - id: analyze
+        name: Analyze PR for changeset
+        if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BOT_TOKEN: ${{ steps.bot-token.outputs.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          MODEL: ${{ inputs.MODEL }}
+        run: node automation/dist/changeset-review.mjs
+
+      - name: Create review marker
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: echo "reviewed" > .review-marker
+
+      - name: Save review cache
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: .review-marker
+          key: changeset-review-pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}
