@@ -48,9 +48,11 @@ jobs:
           cache: "pnpm"
 
       - name: Update NPM
-        # The latest version of npm breaks itself whilst installing itself
+        # WORKAROUND: The latest version of npm breaks itself whilst installing itself
         # see https://github.com/npm/cli/issues/9151 
-        run: npm install -g npm@~11.10.0
+        run: |
+          npm install -g npm@~11.10.0
+          npm install -g npm@latest
 
       - name: Install dependencies
         run: pnpm install
