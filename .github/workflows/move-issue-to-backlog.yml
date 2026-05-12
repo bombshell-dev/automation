@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Generate a token
         id: bot-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
         with:
           app-id: ${{ secrets.BOT_APP_ID }}
           private-key: ${{ secrets.BOT_PRIVATE_KEY }}
@@ -70,6 +70,7 @@ jobs:
       - name: Set fields
         env:
           GH_TOKEN: ${{ steps.bot-token.outputs.token }}
+          STATUS_VALUE: ${{ env.OPTION_ID_STATUS_BACKLOG }}
 
         run: |
           gh api graphql -f query='
@@ -91,4 +92,4 @@ jobs:
                   id
                 }
               }
-            }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$FIELD_ID_STATUS -f status_value=${{ env.OPTION_ID_STATUS_BACKLOG }} --silent
+            }' -f project=$PROJECT_ID -f item=$ITEM_ID -f status_field=$FIELD_ID_STATUS -f status_value=$STATUS_VALUE --silent
