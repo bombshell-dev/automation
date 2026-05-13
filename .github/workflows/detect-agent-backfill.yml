@@ -20,6 +20,7 @@ permissions: {}
 
 jobs:
   backfill:
+    if: github.repository_owner == 'bombshell-dev'
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -42,7 +43,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           LABEL: ${{ inputs.LABEL }}
           REPO: ${{ github.repository }}
-        run: gh label create $LABEL --repo $REPO --color "D93F0B" --description "PR author detected as automated" --force
+        run: gh label create "$LABEL" --repo "$REPO" --color "D93F0B" --description "PR author detected as automated" --force
 
       - name: Scan open PRs
         env:
