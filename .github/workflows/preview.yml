@@ -2,6 +2,11 @@ name: preview
 on:
   workflow_call:
     inputs:
+      type:
+        description: "Preview type: 'pkg.pr.new', 'cloudflare', or 'auto' to detect"
+        default: "auto"
+        required: false
+        type: string
       publish:
         description: "The directory to publish to pkg.pr.new"
         default: "./packages/**"
@@ -12,10 +17,42 @@ on:
         default: "./examples/**"
         required: false
         type: string
+    secrets:
+      CLOUDFLARE_API_TOKEN:
+        description: "Cloudflare API token for preview deployments"
+        required: false
+      CLOUDFLARE_ACCOUNT_ID:
+        description: "Cloudflare account ID"
+        required: false
 
 jobs:
-  preview:
+  detect:
     if: github.repository_owner == 'bombshell-dev'
+    runs-on: ubuntu-latest
+    outputs:
+      type: ${{ steps.detect.outputs.type }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            wrangler.jsonc
+            wrangler.toml
+            wrangler.json
+          sparse-checkout-cone-mode: false
+
+      - id: detect
+        run: |
+          if [[ "${{ inputs.type }}" != "auto" ]]; then
+            echo "type=${{ inputs.type }}" >> "$GITHUB_OUTPUT"
+          elif [[ -f wrangler.jsonc || -f wrangler.toml || -f wrangler.json ]]; then
+            echo "type=cloudflare" >> "$GITHUB_OUTPUT"
+          else
+            echo "type=pkg.pr.new" >> "$GITHUB_OUTPUT"
+          fi
+
+  pkg-pr-new:
+    needs: detect
+    if: needs.detect.outputs.type == 'pkg.pr.new'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -42,4 +79,49 @@ jobs:
         run: pnpm run build
 
       - name: Publish Preview
-        run: pnpx pkg-pr-new publish '${{inputs.publish}}' --template '${{inputs.template}}'
+        run: pnpx pkg-pr-new publish '${{ inputs.publish }}' --template '${{ inputs.template }}'
+
+  cloudflare:
+    needs: detect
+    if: needs.detect.outputs.type == 'cloudflare'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Sanitize branch name
+        id: branch
+        run: |
+          BRANCH="${{ github.head_ref || github.ref_name }}"
+          ALIAS=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' | sed 's/^[^a-z]*//' | cut -c1-63)
+          echo "alias=$ALIAS" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy previews
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          for config in $(find . -name 'wrangler.jsonc' -o -name 'wrangler.toml' -o -name 'wrangler.json' | sort); do
+            dir=$(dirname "$config")
+            echo "::group::Deploying $config"
+            npx wrangler versions upload --preview-alias "${{ steps.branch.outputs.alias }}" --config "$config"
+            echo "::endgroup::"
+          done
