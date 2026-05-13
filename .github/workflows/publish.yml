@@ -13,14 +13,51 @@ on:
 permissions: {}
 
 jobs:
+  build:
+    if: github.repository_owner == 'bombshell-dev'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Update NPM
+        # WORKAROUND: The latest version of npm breaks itself whilst installing itself
+        # see https://github.com/npm/cli/issues/9151
+        run: npm install -g npm@~11.10.0
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            packages/*/dist
+          if-no-files-found: ignore
+          retention-days: 1
+
   publish:
+    needs: build
     if: github.repository_owner == 'bombshell-dev'
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
       id-token: write
-
     steps:
       - name: Generate a token
         id: bot-token
@@ -54,11 +91,13 @@ jobs:
         # see https://github.com/npm/cli/issues/9151
         run: npm install -g npm@~11.10.0
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Install dependencies (no scripts)
+        run: pnpm install --ignore-scripts
 
-      - name: Build
-        run: pnpm run build
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
