@@ -39,7 +39,7 @@ jobs:
     steps:
       - name: Check scan cache
         id: cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .scan-marker
           key: detect-agent-pr-${{ github.event.pull_request.number }}
@@ -68,13 +68,16 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          LABEL: ${{ inputs.LABEL }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          gh label create "${{ inputs.LABEL }}" --repo ${{ github.repository }} --color "D93F0B" --description "PR author detected as automated" --force
-          gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --add-label "${{ inputs.LABEL }}"
+          gh label create $LABEL --repo $REPO --color "D93F0B" --description "PR author detected as automated" --force
+          gh pr edit $PR_NUMBER --repo $REPO --add-label $LABEL
 
       - name: Checkout
         if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           repository: "bombshell-dev/automation"
           ref: "main"
@@ -82,7 +85,7 @@ jobs:
 
       - name: Setup Node
         if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: 22
 
@@ -102,13 +105,18 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true' && steps.analyze.outputs.IS_AGENT == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh label create "${{ inputs.LABEL }}" --repo ${{ github.repository }} --color "D93F0B" --description "PR author detected as automated" --force
+          LABEL: ${{ inputs.LABEL }}
+          REPO: ${{ github.repository }}
+        run: gh label create $LABEL --repo $REPO --color "D93F0B" --description "PR author detected as automated" --force
 
       - name: Add label
         if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true' && steps.analyze.outputs.IS_AGENT == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh pr edit ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --add-label "${{ inputs.LABEL }}"
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          LABEL: ${{ inputs.LABEL }}
+        run: gh pr edit $PR_NUMBER --repo $REPO --add-label $LABEL
 
       - name: Comment on PR
         if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true' && steps.analyze.outputs.IS_AGENT == 'true'
@@ -123,7 +131,7 @@ jobs:
 
       - name: Save scan cache
         if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: .scan-marker
           key: detect-agent-pr-${{ github.event.pull_request.number }}
