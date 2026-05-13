@@ -13,6 +13,8 @@ on:
         required: false
         type: string
 
+permissions: {}
+
 jobs:
   preview:
     if: github.repository_owner == 'bombshell-dev'
@@ -45,4 +47,4 @@ jobs:
         env:
           TEMPLATE_GLOB: ${{ inputs.template }}
           PUBLISH_GLOB: ${{ inputs.publish }}
-        run: pnpx pkg-pr-new publish $PUBLISH_GLOB --template $TEMPLATE_GLOB
+        run: pnpx pkg-pr-new publish "$PUBLISH_GLOB" --template "$TEMPLATE_GLOB"

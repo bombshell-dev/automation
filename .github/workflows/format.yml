@@ -16,6 +16,8 @@ on:
         description: "The GitHub App Private Key for authenticating with the GitHub API"
         required: true
 
+permissions: {}
+
 jobs:
   format:
     if: github.repository_owner == 'bombshell-dev'
