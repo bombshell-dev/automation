@@ -13,6 +13,8 @@ on:
         required: false
         type: string
 
+permissions: {}
+
 jobs:
   preview:
     if: github.repository_owner == 'bombshell-dev'

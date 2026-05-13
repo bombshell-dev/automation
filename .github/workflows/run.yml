@@ -9,6 +9,8 @@ on:
           '["lint","test","types"]'
         required: true
 
+permissions: {}
+
 jobs:
   run:
     runs-on: ubuntu-latest

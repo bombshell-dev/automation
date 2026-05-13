@@ -40,6 +40,8 @@ on:
         type: string
         required: false
 
+permissions: {}
+
 jobs:
   post-message:
     runs-on: ubuntu-latest

@@ -26,6 +26,8 @@ on:
         description: "Whether the PR author is classified as automated (true/false)"
         value: ${{ jobs.detect.outputs.is_agent }}
 
+permissions: {}
+
 jobs:
   detect:
     runs-on: ubuntu-latest

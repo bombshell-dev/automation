@@ -16,6 +16,8 @@ on:
         type: boolean
         required: false
 
+permissions: {}
+
 jobs:
   backfill:
     runs-on: ubuntu-latest
