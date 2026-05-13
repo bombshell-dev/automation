@@ -30,6 +30,7 @@ permissions: {}
 
 jobs:
   detect:
+    if: github.repository_owner == 'bombshell-dev'
     runs-on: ubuntu-latest
     outputs:
       classification: ${{ steps.analyze.outputs.CLASSIFICATION }}
@@ -61,7 +62,7 @@ jobs:
           fi
           # Check org membership
           if [[ "$BYPASS_MEMBERS" == "true" ]]; then
-            if gh api repos/${{ github.repository }}/collaborators/$PR_AUTHOR --silent 2>/dev/null; then
+            if gh api "repos/$GITHUB_REPOSITORY/collaborators/$PR_AUTHOR" --silent 2>/dev/null; then
               echo "skip=true" >> "$GITHUB_OUTPUT"
             fi
           fi
@@ -71,11 +72,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           LABEL: ${{ inputs.LABEL }}
-          REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          gh label create $LABEL --repo $REPO --color "D93F0B" --description "PR author detected as automated" --force
-          gh pr edit $PR_NUMBER --repo $REPO --add-label $LABEL
+          gh label create "$LABEL" --repo "$GITHUB_REPOSITORY" --color "D93F0B" --description "PR author detected as automated" --force
+          gh pr edit "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label "$LABEL"
 
       - name: Checkout
         if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true'
@@ -108,24 +108,23 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           LABEL: ${{ inputs.LABEL }}
-          REPO: ${{ github.repository }}
-        run: gh label create $LABEL --repo $REPO --color "D93F0B" --description "PR author detected as automated" --force
+        run: gh label create "$LABEL" --repo "$GITHUB_REPOSITORY" --color "D93F0B" --description "PR author detected as automated" --force
 
       - name: Add label
         if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true' && steps.analyze.outputs.IS_AGENT == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPO: ${{ github.repository }}
           LABEL: ${{ inputs.LABEL }}
-        run: gh pr edit $PR_NUMBER --repo $REPO --add-label $LABEL
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr edit "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --add-label "$LABEL"
 
       - name: Comment on PR
         if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true' && steps.analyze.outputs.IS_AGENT == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           COMMENT_BODY: ${{ steps.analyze.outputs.COMMENT }}
-        run: gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "$COMMENT_BODY"
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body "$COMMENT_BODY"
 
       - name: Create scan marker
         if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true'
