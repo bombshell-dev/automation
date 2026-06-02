@@ -47,7 +47,8 @@ jobs:
           name: build-output
           path: |
             packages/*/dist
-          if-no-files-found: ignore
+            dist
+          if-no-files-found: error
           retention-days: 1
 
   publish:
