@@ -13,16 +13,10 @@ on:
         required: false
         type: string
 
-permissions: {}
-
 jobs:
   preview:
     if: github.repository_owner == 'bombshell-dev'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-      id-token: write
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -47,4 +41,4 @@ jobs:
         env:
           TEMPLATE_GLOB: ${{ inputs.template }}
           PUBLISH_GLOB: ${{ inputs.publish }}
-        run: pnpx pkg-pr-new publish "$PUBLISH_GLOB" --template "$TEMPLATE_GLOB"
+        run: pnpx pkg-pr-new publish --pnpm "$PUBLISH_GLOB" --template "$TEMPLATE_GLOB"
