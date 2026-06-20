@@ -14,9 +14,9 @@ importers:
       '@types/node':
         specifier: ^22.19.15
         version: 22.19.15
-      voight-kampff-test:
-        specifier: ^2.2.1
-        version: 2.2.1
+      '@unveil/identity':
+        specifier: ^1.6.0
+        version: 1.6.0
 
 packages:
 
@@ -579,6 +579,9 @@ packages:
     resolution: {integrity: sha512-NcKdPiGjxxxdh7fLgRKTrn5hLntbt89NOodNaSrMChTfJwvLaDkgrRlnO7v5x+m7nQc87Qf1y7UoT1ZEZUBB4Q==}
     hasBin: true
 
+  '@unveil/identity@1.6.0':
+    resolution: {integrity: sha512-7myIgvmu82+a7f3C1rx7iBqOIhXNvKKUrA9+RrNg7U2pFKgnx6d/f/IMK83iKLGiBTR6/IaNZAUhh3L9cuQuvA==}
+
   '@vitest/expect@4.1.0':
     resolution: {integrity: sha512-EIxG7k4wlWweuCLG9Y5InKFwpMEOyrMb6ZJ1ihYu02LVj/bzUwn2VMU+13PinsjRW75XnITeFrQBMH5+dLvCDA==}
 
@@ -1115,9 +1118,6 @@ packages:
       jsdom:
         optional: true
 
-  voight-kampff-test@2.2.1:
-    resolution: {integrity: sha512-3UZeXWdurDttmk31fR+W+w292z0H3qbwCz1ZQSxNIfaDzyNfFjt8jAhzIOF7WsVG86PJMcsujVJutacewguqzw==}
-
   walk-up-path@4.0.0:
     resolution: {integrity: sha512-3hu+tD8YzSLGuFYtPRb48vdhKMi0KQV5sn+uWr8+7dMEq/2G/dtLrdDinkLjqq5TIbIBjYJ4Ax/n3YiaW7QM8A==}
     engines: {node: 20 || >=22}
@@ -1532,6 +1532,8 @@ snapshots:
       '@typescript/native-preview-linux-x64': 7.0.0-dev.20260307.1
       '@typescript/native-preview-win32-arm64': 7.0.0-dev.20260307.1
       '@typescript/native-preview-win32-x64': 7.0.0-dev.20260307.1
+
+  '@unveil/identity@1.6.0': {}
 
   '@vitest/expect@4.1.0':
     dependencies:
@@ -2021,8 +2023,6 @@ snapshots:
       '@types/node': 22.19.15
     transitivePeerDependencies:
       - msw
-
-  voight-kampff-test@2.2.1: {}
 
   walk-up-path@4.0.0: {}
 

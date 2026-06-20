@@ -20,7 +20,7 @@ on:
         description: "The classification result: organic, mixed, or automation"
         value: ${{ jobs.detect.outputs.classification }}
       score:
-        description: "The raw score from voight-kampff-test"
+        description: "The raw score from @unveil/identity"
         value: ${{ jobs.detect.outputs.score }}
       is_agent:
         description: "Whether the PR author is classified as automated (true/false)"

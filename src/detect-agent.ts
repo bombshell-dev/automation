@@ -1,4 +1,4 @@
-import { identifyReplicant, getClassificationDetails } from "voight-kampff-test";
+import { identify, getClassificationDetails } from "@unveil/identity";
 import { setOutput } from "./utils";
 
 const jsonMode = process.argv.includes("--json");
@@ -38,7 +38,7 @@ for (let page = 1; page <= 2; page++) {
 	if (pageEvents.length < 100) break;
 }
 
-const { classification, score, flags } = identifyReplicant({
+const { classification, score, flags } = identify({
 	accountName: PR_AUTHOR,
 	reposCount: user.public_repos,
 	createdAt: user.created_at,
@@ -101,7 +101,7 @@ const comment = `### ${details.label}
 |--------|--------|--------|
 ${flagsTable}
 
-<sub>Analyzed ${events.length} public events via <a href="https://www.npmx.dev/package/voight-kampff-test">voight-kampff-test</a></sub>`;
+<sub>Analyzed ${events.length} public events via <a href="https://www.npmx.dev/package/@unveil/identity">@unveil/identity</a></sub>`;
 
 
 log(`Classification: ${classification} (score: ${score})`);
