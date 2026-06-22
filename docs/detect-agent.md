@@ -1,6 +1,6 @@
 # detect-agent
 
-Detects automated (bot/agent) PR authors using [`voight-kampff-test`](https://www.npmx.dev/package/voight-kampff-test) which powers [AgentScan](https://agentscan.netlify.app/). Analyzes public GitHub activity to classify accounts as `organic`, `mixed`, or `automation`.
+Detects automated (bot/agent) PR authors using [`@unveil/identity`](https://www.npmx.dev/package/@unveil/identity) which powers [AgentScan](https://agentscan.tools/). Analyzes public GitHub activity to classify accounts as `organic`, `mixed`, or `automation`.
 
 - `[bot]` accounts are labeled immediately without analysis
 - Organization members and collaborators are bypassed by default
@@ -19,7 +19,7 @@ Detects automated (bot/agent) PR authors using [`voight-kampff-test`](https://ww
 | Name             | Description                                                       |
 | ---------------- | ----------------------------------------------------------------- |
 | `classification` | The classification result: `organic`, `mixed`, or `automation`    |
-| `score`          | The raw score from voight-kampff-test                             |
+| `score`          | The raw score from @unveil/identity                               |
 | `is_agent`       | Whether the PR author is classified as automated (`true`/`false`) |
 
 ## Secrets
