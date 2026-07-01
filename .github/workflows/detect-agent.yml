@@ -42,7 +42,7 @@ jobs:
     steps:
       - name: Check scan cache
         id: cache
-        uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .scan-marker
           key: detect-agent-pr-${{ github.event.pull_request.number }}
@@ -79,7 +79,7 @@ jobs:
 
       - name: Checkout
         if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true'
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           repository: "bombshell-dev/automation"
           ref: "main"
@@ -132,7 +132,7 @@ jobs:
 
       - name: Save scan cache
         if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true'
-        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .scan-marker
           key: detect-agent-pr-${{ github.event.pull_request.number }}
