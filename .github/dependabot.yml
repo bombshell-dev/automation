@@ -8,3 +8,7 @@ updates:
       actions:
         patterns:
           - "*"
+    ignore:
+      # v2 needs @changesets/cli v3 in every caller, so bump it manually
+      - dependency-name: "changesets/action"
+        update-types: ["version-update:semver-major"]
