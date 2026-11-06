@@ -104,10 +104,8 @@ jobs:
         id: changesets
         uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
         with:
-          version: pnpm exec changeset version
-          publish: pnpm exec changeset publish
-          commit: "[ci] release"
-          title: "[ci] release"
-          setupGitUser: false
-        env:
-          GITHUB_TOKEN: ${{ steps.bot-token.outputs.token }}
+          version-script: pnpm exec changeset version
+          publish-script: pnpm exec changeset publish
+          commit-message: "[ci] release"
+          pr-title: "[ci] release"
+          github-token: ${{ steps.bot-token.outputs.token }}
