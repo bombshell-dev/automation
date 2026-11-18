@@ -2,7 +2,17 @@
 
 Creates release pull requests or publishes packages to npm using [changesets](https://github.com/changesets/changesets).
 
-When pending changesets exist, this workflow opens a release PR. When that PR is merged, it publishes the packages to npm.
+When pending changesets exist, this workflow opens a release PR. When that PR is merged, it publishes the packages to npm. Release commits and tags are pushed through the GitHub API, so they are signed and attributed to `bombshell-bot[bot]`.
+
+## Requirements
+
+This workflow uses [`changesets/action`](https://github.com/changesets/action) v2, which requires `@changesets/cli` v3 in the calling repository. See the [Changesets migration guide](https://changesets.dev/guide/migration) for how to upgrade.
+
+Repositories still on `@changesets/cli` v2 should pin this workflow to `0c11c22d745695ae196865bca0d0cc177263bee9` until they migrate:
+
+```yaml
+uses: bombshell-dev/automation/.github/workflows/publish.yml@0c11c22d745695ae196865bca0d0cc177263bee9
+```
 
 ## Inputs
 

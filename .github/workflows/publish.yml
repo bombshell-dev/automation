@@ -102,12 +102,10 @@ jobs:
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
-        uses: changesets/action@a45c4d594aa4e2c509dc14a9f2b3b67ba3780d0d # v1.9.0
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
-          version: pnpm exec changeset version
-          publish: pnpm exec changeset publish
-          commit: "[ci] release"
-          title: "[ci] release"
-          setupGitUser: false
-        env:
-          GITHUB_TOKEN: ${{ steps.bot-token.outputs.token }}
+          version-script: pnpm exec changeset version
+          publish-script: pnpm exec changeset publish
+          commit-message: "[ci] release"
+          pr-title: "[ci] release"
+          github-token: ${{ steps.bot-token.outputs.token }}
