@@ -91,10 +91,6 @@ jobs:
         with:
           node-version: 22
 
-      - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true'
-        run: npm install --prefix automation
-
       - id: analyze
         name: Analyze PR author
         if: steps.cache.outputs.cache-hit != 'true' && steps.bypass.outputs.is_bot != 'true' && steps.bypass.outputs.skip != 'true'
